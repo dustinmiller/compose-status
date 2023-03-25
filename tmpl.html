@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <meta http-equiv="refresh" content="10" />
   <!-- TODO: bundle this -->
-  <script type="text/javascript" src="/chart.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
   <title>{{ .PageTitle }}</title>
   <style>
     :root {
       --group-header-width: 18px;
       --group-header-colour: #ddd;
       --section-radius: 4px;
-      --colour-main: #fff5a0;
+      --colour-main: #44475A;
     }
     * {
       margin: 0;
@@ -22,15 +22,20 @@
       margin: 0 auto;
       max-width: 500px;
       font-family: monospace;
+      background-color: #282A36;
     }
     a {
       color: unset;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
     }
     p {
       font-style: italic;
     }
-    table {
-      border-spacing: 6px 1px;
+    td,div {
+      border-radius: 5px;
     }
     .right {
       text-align: right;
@@ -39,22 +44,20 @@
       opacity: 0.3;
     }
     .red {
-      color: #f44336;
+      color: red;
     }
     .green {
-      color: #4caf50;
-    }
-    .bold {
-      font-weight: bold;
+      color: #388E3C;
     }
     .stat-table {
       margin-left: auto;
       text-align: right;
     }
-    .ellipsis {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .stat-table tr td:last-child {
+      font-weight: bold;
+    }
+    .stat-table tr td:last-child::before {
+      content: '\00a0';
     }
     .group {
       margin: 12px 0;
@@ -80,27 +83,6 @@
     .project~.project {
       border-top: 1px solid white;
     }
-    .status-badge {
-      color: white;
-      border-radius: 3px;
-      padding: 0 6px;
-      white-space: nowrap;
-    }
-    .status-blue {
-      background-color: #03a9f4;
-    }
-    .status-green {
-      background-color: #4caf50;
-    }
-    .status-cyan {
-      background-color: #00bcd4;
-    }
-    .status-orange {
-      background-color: #ff9800;
-    }
-    .status-red {
-      background-color: #f44336;
-    }
   </style>
 </head>
 {{ $rootProjects := .Projects }}
@@ -116,19 +98,19 @@
         <table class="stat-table">
           <tr>
             <td>cpu</td>
-            <td class="bold">{{ printf "%.2f" .Stats.CPU }}% {{ printf "%.0f" .Stats.CPUTemp }}&deg;C</td>
+            <td>{{ printf "%.2f" .Stats.CPU }}% {{ printf "%.0f" .Stats.CPUTemp }}&deg;C</td>
           </tr>
           <tr>
             <td>memory</td>
-            <td class="bold">{{ .Stats.MemUsed | humanBytes }} / {{ .Stats.MemTotal | humanBytes }}</td>
+            <td>{{ .Stats.MemUsed | humanBytes }} / {{ .Stats.MemTotal | humanBytes }}</td>
           </tr>
           <tr>
             <td>load</td>
-            <td class="bold">{{ .Stats.Load1 }} {{ .Stats.Load5 }} {{ .Stats.Load15 }}</td>
+            <td>{{ .Stats.Load1 }} {{ .Stats.Load5 }} {{ .Stats.Load15 }}</td>
           </tr>
           <tr>
             <td>uptime</td>
-            <td class="bold">{{ .Stats.Uptime | humanDuration }}</td>
+            <td>{{ .Stats.Uptime | humanDuration }}</td>
           </tr>
         </table>
       </div>
@@ -149,32 +131,16 @@
       {{ range $projectName := $projects }}
       <div class="project">
         <p><strong>{{ $projectName }}</strong></p>
-        <table class="stat-table">
+        <table class="stat-table aligned-stat-table">
           {{ $project := index $rootProjects $projectName }}
           {{ range $container := $project }}
           <tr class="green">
             {{ if not (eq $container.Link "") }}
-              <td class="ellipsis"><a href="//{{ $container.Link }}" target="_blank">{{ $container.Name }}</a></td>
+              <td><a href="//{{ $container.Link }}" target="_blank">{{ $container.Name }}</a></td>
             {{ else }}
-              <td class="ellipsis">{{ $container.Name }}</td>
+              <td>{{ $container.Name }}</td>
             {{ end }}
-
-            <td style="width: 80px" class="bold ellipsis">{{ $container.Status }}</td>
-
-            {{ if $container.HTTP.Timeout }}
-              <td style="width: 80px"><span class="status-badge status-red">timeout</span></td>
-            {{ else if (eq $container.HTTP.Code 0) }}
-            {{ else if $container.HTTP.OK }}
-              <td style="width: 80px"><span class="status-badge status-green">{{ $container.HTTP.Duration | humanDuration }}</span></td>
-            {{ else if (lt $container.HTTP.Code 300) }}
-              <td style="width: 80px"><span class="status-badge status-blue">{{ $container.HTTP.Code }}</span></td>
-            {{ else if (lt $container.HTTP.Code 400) }}
-              <td style="width: 80px"><span class="status-badge status-cyan">{{ $container.HTTP.Code }}</span></td>
-            {{ else if (lt $container.HTTP.Code 500) }}
-              <td style="width: 80px"><span class="status-badge status-orange">{{ $container.HTTP.Code }}</span></td>
-            {{ else if (lt $container.HTTP.Code 600) }}
-              <td style="width: 80px"><span class="status-badge status-red">{{ $container.HTTP.Code }}</span></td>
-            {{ end }}
+            <td>{{ $container.Status }}</td>
           </tr>
           {{ end }}
         </table>
