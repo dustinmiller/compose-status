@@ -19,6 +19,7 @@ services:
     - CS_PAGE_TITLE=my.domain status
     - CS_SCAN_INTERVAL=5
     - CS_HIST_WINDOW=1800
+    - CS_DOCKER_NETWORK_NAME=mydomain_default
     expose:
     - 80
     volumes:
